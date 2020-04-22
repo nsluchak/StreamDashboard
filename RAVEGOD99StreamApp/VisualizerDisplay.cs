@@ -42,7 +42,80 @@ namespace StreamApp
             this.strength = strength;
         }
 
-        public Int32 ToArgb()
+        public void SetColor(Int32 ARGB, double strength = 1)
+        {
+            byte[] argb_bytes = BitConverter.GetBytes(ARGB);
+            this.r = argb_bytes[2];
+            this.g = argb_bytes[1];
+            this.b = argb_bytes[0];
+            this.strength = strength;
+        }
+
+        public static Int32 HSVtoARGB(double h, double s, double v) //needs strict bounds checking
+        {
+            Int32 ARGB = 0;
+
+            h = h % 360;
+            s = s > 1.0 ? 1 : s < 0 ? 0 : s;
+            v = v > 1.0 ? 1 : v < 0 ? 0 : v;
+
+            double C = s * v;
+            Console.WriteLine("Chrome: " + C);
+            int h60 = (int) (h / 60);
+            Console.WriteLine("H': " + h60);
+            double X = C * (1 - Math.Abs( (h60 % 2) - 1));
+            Console.WriteLine("X: " + X);
+
+            double r1=0, g1=0, b1=0;
+            if(h60 >=0 && h60 <= 1)
+            {
+                r1 = C; g1 = X; b1 = 0;
+            }
+            else if(h60 > 1 && h60 <= 2)
+            {
+                r1 = X; g1 = C; b1 = 0;
+            }
+            else if (h60 > 2 && h60 <= 3)
+            {
+                r1 = 0; g1 = C; b1 = X;
+            }
+            else if (h60 > 3 && h60 <= 4)
+            {
+                r1 = 0; g1 = X; b1 = C;
+            }
+            else if (h60 > 4 && h60 <= 5)
+            {
+                r1 = X; g1 = 0; b1 = C;
+            }
+            else if (h60 > 5 && h60 <= 6)
+            {
+                r1 = C; g1 = 0; b1 = X;
+            }
+
+            double m = v - C;
+
+            Console.WriteLine($"R1G1B1: {r1}, {g1}, {b1}");
+            Console.WriteLine($"m: {m}");
+
+            double r2 = (r1 + m);
+            double g2 = (g1 + m);
+            double b2 = (b1 + m);
+
+            Console.WriteLine($"R2G2B2: {r2}, {g2}, {b2}");
+
+            int r = (int) (r2 * 255);
+            int g = (int) (g2 * 255);
+            int b = (int) (b2 * 255);
+
+            Console.WriteLine($"RGB: {r}, {g}, {b}");
+
+            ARGB = (255 << 24 | r << 16 | g << 8 | b);
+            
+
+            return ARGB;
+        }
+
+        public Int32 ToARGB()
         {
             byte a = 255; // 1111 1111
             Int32 ARGB = 0; // (0000 0000) (0000 0000) (0000 0000) (0000 0000)
@@ -58,6 +131,17 @@ namespace StreamApp
             this.b = b;
             this.strength = strength;
         }
+
+        public RGBS(Int32 ARGB, double strength = 1)
+        {
+            byte[] argb_bytes = BitConverter.GetBytes(ARGB);
+            this.r = argb_bytes[2];
+            this.g = argb_bytes[1];
+            this.b = argb_bytes[0];
+            Console.WriteLine($"FROM ARGB: {this.r}, {this.g}, {this.b}");
+            this.strength = strength;
+        }
+
     }
 
     internal struct DisplayPixel {
@@ -80,9 +164,9 @@ namespace StreamApp
             this.rgbs = rgbs;
         }
 
-        public Int32 ToArgb()
+        public Int32 ToARGB()
         {
-            return rgbs.ToArgb();
+            return rgbs.ToARGB();
         }
     }
 

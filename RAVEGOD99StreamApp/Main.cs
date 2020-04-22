@@ -53,7 +53,7 @@ namespace StreamApp
 
             for (int i = 0; i < pixels.GetLength(0); ++i)
                 for(int j = 0; j < pixels.GetLength(1); ++j)
-                 led_projection.SetPixel(pixels[i,j].COOR.Item1, pixels[i,j].COOR.Item2, Color.FromArgb(pixels[i,j].ToArgb()));
+                 led_projection.SetPixel(pixels[i,j].COOR.Item1, pixels[i,j].COOR.Item2, Color.FromArgb(pixels[i,j].ToARGB()));
 
             LEDProjector.Image = led_projection;
             //////////

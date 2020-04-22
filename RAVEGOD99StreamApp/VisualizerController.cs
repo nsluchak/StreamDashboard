@@ -14,8 +14,8 @@ namespace StreamApp
     {
         //Working data      
         SoundSettings settings;
-        int[] frequency_ranges = new int[] {43, 86, 172, 258, 350, 450, 1225, 2000, 5000, 8000, 12000, 16000};
-        int[] frequency_sizes = new int[] {43, 43, 86, 86, 92 ,100, 775, 775, 3000, 3000, 4000, 4000};
+        int[] frequency_ranges = new int[] { 86, 172, 258, 350, 450, 1225, 2000, 4000, 6000, 10000};
+        int[] frequency_sizes = new int[] {86, 86, 86, 92 ,100, 775, 775, 2000, 2000, 4000};
         Random rand = new Random();
         RGBS[] sectionColor;
         bool _colorSet = false;
@@ -67,7 +67,7 @@ namespace StreamApp
 
         private void Visualize(double[] pcm, double[] fftReal)
         {
-            double RMS = Math.Sqrt(pcm.Select(x => Math.Pow(x, 2)).ToList().Average()); //root-mean-square
+            double RMS = Math.Sqrt(pcm.Select(x => Math.Pow(x, 2)).ToList().Average()); //root-mean-square (energy-level)
             double dB = 20 * Math.Log10(RMS);
             int[] ampsAtFreq = GetAvgAmplitudesAtFrequencyRanges(fftReal, frequency_ranges);        
             double MIN_RANGE = 43;
@@ -81,18 +81,25 @@ namespace StreamApp
             
             for (int i = 0; i < sections; ++ i)
             {
-                double RLE = 1 / (Math.Log(MIN_RANGE, 15) / Math.Log(frequency_sizes[i], 15));
+                //double RLE = 1 / (Math.Log(MIN_RANGE,10) / Math.Log(frequency_sizes[i], 10));
+                //double RLE = 1 / (MIN_RANGE / frequency_sizes[i]);
+                double RLE = 1 / (MIN_RANGE / ( frequency_sizes[i]/ Math.Log10( frequency_sizes[i] ) ) );
                 normalizedAmpsAtFreq[i] = (int)RLE * ampsAtFreq[i];
             }
 
-            result = String.Join(" - ", normalizedAmpsAtFreq);
+            result = RMS.ToString();
 
-            int MAX_INTENSITY = 500;
+            int MAX_INTENSITY = 2500;
             double intensityPerPixel = MAX_INTENSITY / sectionMaxHeight;
             
             if (!_colorSet) {
                 sectionColor = new RGBS[sections];
-                for (int i = 0; i < sections; ++ i) sectionColor[i] = new RGBS((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));
+                for (int i = 0; i < sections; ++ i)
+                {
+                    double h = rand.Next(360), s = rand.NextDouble();
+                    Console.WriteLine(h);
+                    sectionColor[i] = new RGBS( RGBS.HSVtoARGB( 300, s, 1.0 ) );
+                }
                 _colorSet = true;
             } 
             for (int section = 0; section < sections; ++ section)
@@ -101,11 +108,11 @@ namespace StreamApp
                 int sectionHeight = (int) (normalizedAmpsAtFreq[section] / intensityPerPixel) + 1;
                 if(sectionHeight > sectionMaxHeight)
                 {
-                    sectionColor[section].SetColor((byte)rand.Next(256), (byte)rand.Next(256), (byte)rand.Next(256));         
+                    double h = rand.Next(360), s = rand.NextDouble();
+                    sectionColor[section].SetColor( RGBS.HSVtoARGB( 300, s, 1.0 ) );         
                     sectionHeight = sectionMaxHeight;
                 }
                 int x_padding = section * sectionWidth;
-                //Console.WriteLine("sectionHeight: " + sectionHeight);
                 for (int x = 0; x < sectionWidth; ++ x) { 
                     for (int y = 0; y < sectionHeight; ++ y)
                         display.SetPixel(x_padding+x, (sectionMaxHeight-1)-y, sectionColor[section]);
@@ -124,7 +131,6 @@ namespace StreamApp
             int[] avgAmplitudesAtFrequencyRanges = new int[ranges];
             int MAX_FREQ = settings.RATE / 2;
             int frequencySpacing = MAX_FREQ / bufSize;
-            Console.WriteLine(frequencySpacing);
 
             for (int i = 0, k = 0; i < ranges; ++ i)
             {
