@@ -69,7 +69,7 @@ namespace StreamApp
         {
             double RMS = Math.Sqrt(pcm.Select(x => Math.Pow(x, 2)).ToList().Average()); //root-mean-square (energy-level)
             double dB = 20 * Math.Log10(RMS);
-            int[] ampsAtFreq = GetAvgAmplitudesAtFrequencyRanges(fftReal, frequency_ranges);        
+            int[] ampsAtFreq = GetAboveMinAvgAmplitudesAtFrequencyRanges(fftReal, frequency_ranges, 0);        
             double MIN_RANGE = 43;
             
 
@@ -81,9 +81,10 @@ namespace StreamApp
             
             for (int i = 0; i < sections; ++ i)
             {
+                double RLE = 1;
                 //double RLE = 1 / (Math.Log(MIN_RANGE,10) / Math.Log(frequency_sizes[i], 10));
                 //double RLE = 1 / (MIN_RANGE / frequency_sizes[i]);
-                double RLE = 1 / (MIN_RANGE / ( frequency_sizes[i]/ Math.Log10( frequency_sizes[i] ) ) );
+                //double RLE = 1 / (MIN_RANGE / ( frequency_sizes[i]/ Math.Log( frequency_sizes[i], MIN_RANGE) ) );
                 normalizedAmpsAtFreq[i] = (int)RLE * ampsAtFreq[i];
             }
 
@@ -132,18 +133,51 @@ namespace StreamApp
             int MAX_FREQ = settings.RATE / 2;
             int frequencySpacing = MAX_FREQ / bufSize;
 
-            for (int i = 0, k = 0; i < ranges; ++ i)
+            for (int range = 0, i = 0; range < ranges; ++ range)
             {
-                int currentMax = frequencyRanges[i];
+                int ceiling = frequencyRanges[range];
                 double runningSum = 0;
 
-                while (k*frequencySpacing < currentMax && k < bufSize) //add up loudness of each frequency data point in specified data range
-                    runningSum += fft[k++];
+                while (i * frequencySpacing < ceiling && i < bufSize) //add up loudness of each frequency data point in specified data range
+                    runningSum += fft[i ++];
 
-                int average = (int)(runningSum / (currentMax / frequencySpacing));
-                avgAmplitudesAtFrequencyRanges[i] = average;   
+                int average = (int)(runningSum / (ceiling / frequencySpacing));
+                avgAmplitudesAtFrequencyRanges[range] = average;   
             }
+
             return avgAmplitudesAtFrequencyRanges;
+        }
+
+        private int[] GetAboveMinAvgAmplitudesAtFrequencyRanges(double[] fft, int[] frequencyRanges, int min)
+        {
+            int ranges = frequencyRanges.Length;
+            int bufSize = fft.Length;
+
+            int[] aboveMinAvgAmplitudesAtFrequencyRanges = new int[ranges];
+            int MAX_FREQ = settings.RATE / 2;
+            int frequencySpacing = MAX_FREQ / bufSize;
+
+            for(int range = 0, i = 0; range < ranges; ++ range)
+            {
+                int ceiling = frequencyRanges[range];
+                int counter = 0;
+                double runningSum = 0;
+
+                while (i * frequencySpacing < ceiling && i < bufSize) //only counts and adds values about the minimum
+                {
+                    if(fft[i] > min)
+                    {
+                        runningSum += fft[i];
+                        ++ counter; 
+                    }
+                    ++i;
+                }
+
+                int average = (int)(runningSum / counter);
+                aboveMinAvgAmplitudesAtFrequencyRanges[range] = average;
+            }
+
+            return aboveMinAvgAmplitudesAtFrequencyRanges;
         }
 
         public String getResult()
