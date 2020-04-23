@@ -60,11 +60,8 @@ namespace StreamApp
             v = v > 1.0 ? 1 : v < 0 ? 0 : v;
 
             double C = s * v;
-            Console.WriteLine("Chrome: " + C);
             int h60 = (int) (h / 60);
-            Console.WriteLine("H': " + h60);
             double X = C * (1 - Math.Abs( (h60 % 2) - 1));
-            Console.WriteLine("X: " + X);
 
             double r1=0, g1=0, b1=0;
             if(h60 >=0 && h60 <= 1)
@@ -94,20 +91,13 @@ namespace StreamApp
 
             double m = v - C;
 
-            Console.WriteLine($"R1G1B1: {r1}, {g1}, {b1}");
-            Console.WriteLine($"m: {m}");
-
             double r2 = (r1 + m);
             double g2 = (g1 + m);
             double b2 = (b1 + m);
 
-            Console.WriteLine($"R2G2B2: {r2}, {g2}, {b2}");
-
             int r = (int) (r2 * 255);
             int g = (int) (g2 * 255);
             int b = (int) (b2 * 255);
-
-            Console.WriteLine($"RGB: {r}, {g}, {b}");
 
             ARGB = (255 << 24 | r << 16 | g << 8 | b);
             
@@ -138,7 +128,6 @@ namespace StreamApp
             this.r = argb_bytes[2];
             this.g = argb_bytes[1];
             this.b = argb_bytes[0];
-            Console.WriteLine($"FROM ARGB: {this.r}, {this.g}, {this.b}");
             this.strength = strength;
         }
 
