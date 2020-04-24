@@ -4,21 +4,6 @@ using NAudio.Wave;
 
 namespace StreamApp
 {
-    public struct SoundSettings
-    {
-        public int RATE { get; } //samples per second
-        public int SAMPLES { get; } //# of samples
-        public int BITDEPTH { get; } //bits per sample
-        public int CHANNELS { get; } //channels for audio
-
-        public SoundSettings(int rate, int samples, int bitdepth, int channels)
-        {
-            RATE = rate;
-            SAMPLES = samples;
-            BITDEPTH = bitdepth;
-            CHANNELS = channels;
-        }
-    }
 
     public class SoundInputHandler
     {

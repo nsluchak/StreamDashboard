@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace StreamApp
 {
-    internal struct RGBS
+
+    public class RGBS
     {
+
+        private double R_GRAY_CONST = 0.2989;
+        private double G_GRAY_CONST = 0.5870;
+        private double B_GRAY_CONST = 0.1140;
+
         private byte r;
         public byte R
         {
@@ -95,9 +101,9 @@ namespace StreamApp
             double g2 = (g1 + m);
             double b2 = (b1 + m);
 
-            int r = (int) (r2 * 255);
-            int g = (int) (g2 * 255);
-            int b = (int) (b2 * 255);
+            byte r = (byte) (r2 * 255);
+            byte g = (byte) (g2 * 255);
+            byte b = (byte) (b2 * 255);
 
             ARGB = (255 << 24 | r << 16 | g << 8 | b);
             
@@ -107,9 +113,21 @@ namespace StreamApp
 
         public Int32 ToARGB()
         {
-            byte a = 255; // 1111 1111
-            Int32 ARGB = 0; // (0000 0000) (0000 0000) (0000 0000) (0000 0000)
-            ARGB = (a << 24 | r << 16 | g << 8 | b); // 0000 0000 
+            byte a = (byte) (strength * 255);
+            Int32 ARGB = 0;
+            ARGB = (a << 24 | r << 16 | g << 8 | b); 
+
+            //Console.WriteLine($"R: {r} G: {g} B: {b}");
+
+            return ARGB;
+        }
+
+        public Int32 ToGrayscale()
+        {
+            byte a = (byte) (strength * 255);
+            Int32 ARGB = 0;
+            byte gray = (byte) (((r * R_GRAY_CONST) + (g * G_GRAY_CONST) + (b * B_GRAY_CONST)) / 3);
+            ARGB = (a << 24 | gray << 16 | gray << 8 | gray);
 
             return ARGB;
         }
@@ -133,7 +151,7 @@ namespace StreamApp
 
     }
 
-    internal struct DisplayPixel {
+    internal class DisplayPixel {
 
         public RGBS rgbs;
         public Tuple<int, int> COOR { get; }
@@ -152,7 +170,11 @@ namespace StreamApp
         {
             this.rgbs = rgbs;
         }
-
+        public void SetColor(RGBS rgbs, double strength)
+        {
+            this.rgbs = rgbs;
+            this.rgbs.STRENGTH = strength;
+        }
         public Int32 ToARGB()
         {
             return rgbs.ToARGB();
@@ -164,6 +186,7 @@ namespace StreamApp
         DisplayPixel[,] display;
         public int width { get; set; }
         public int height { get; set; }
+        public double brightness { get; set; } = 1;
 
         public VisualizerDisplay(int w, int h)
         {
@@ -175,7 +198,7 @@ namespace StreamApp
                     display[i, j] = new DisplayPixel(0,0,0, new Tuple<int,int>(i,j));
         }
 
-        public void SetPixel(int x, int y, byte r, byte g, byte b, int strength = 1)
+        public void SetPixel(int x, int y, byte r, byte g, byte b, double strength = 1)
         {
             //Console.WriteLine("x, y: " + x + ", " + y);
             
@@ -186,6 +209,12 @@ namespace StreamApp
         {
             //Console.WriteLine("x, y: " + x + ", " + y);
             display[x, y].SetColor(rgbs);
+        }
+
+        public void SetPixel(int x, int y, RGBS rgbs, double strength = 1)
+        {
+            //Console.WriteLine("x, y: " + x + ", " + y);
+            display[x, y].SetColor(rgbs, strength);
         }
 
         public DisplayPixel[,] getDisplay()
