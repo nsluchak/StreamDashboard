@@ -222,5 +222,51 @@ namespace StreamApp
             return display;
         }
 
+        public byte[] pixelToData(int x, int y)
+        {
+            byte[] packet = new byte[Dashboard.WorkingProfile.NetworkProfile.LEDDataSize];
+
+            int led_index = x + (y * width);
+
+            byte[] indexAsBytes = BitConverter.GetBytes(led_index); //bytes in little endian order
+
+            packet[0] = indexAsBytes[1]; //pack in big endian order
+            packet[1] = indexAsBytes[0]; //^
+
+            RGBS color = display[x, y].rgbs;
+            packet[2] = color.R;
+            packet[3] = color.G;
+            packet[4] = color.B;
+
+            return packet;
+        }
+
+        public byte[] displayToPacket()
+        {
+            int DATA_SIZE = Dashboard.WorkingProfile.NetworkProfile.LEDDataSize;
+
+            byte[] packet = new byte[DATA_SIZE * width * height + 1];
+            packet[0] = Dashboard.WorkingProfile.NetworkProfile._KEY_;
+
+            for(int y = 0; y < height; ++ y)
+            {
+                for(int x = 0; x < width; ++ x)
+                {
+                   
+                    byte[] pixelData = pixelToData(x, y);
+                    int pixel = pixelData[0] * 256 + pixelData[1];
+                    int pad = pixel * DATA_SIZE + 1;
+
+                    packet[pad + 0] = pixelData[0];
+                    packet[pad + 1] = pixelData[1]; 
+                    packet[pad + 2] = pixelData[2]; 
+                    packet[pad + 3] = pixelData[3]; 
+                    packet[pad + 4] = pixelData[4]; 
+                }
+            }
+
+            return packet;
+        }
+
     }
 }

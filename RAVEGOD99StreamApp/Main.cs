@@ -12,12 +12,16 @@ namespace StreamApp
 {
     public partial class Dashboard : Form
     {
-
+        public static Profile WorkingProfile;
         SoundInputHandler soundInputHandler;
         VisualizerController visualizerController;
+        NetworkHandler networkHandler;
 
         public Dashboard()
         {
+            WorkingProfile = new Profile();
+            networkHandler = new NetworkHandler();
+
             InitializeComponent();
 
             String[] deviceNames = SoundInputHandler.GetAvailableDevices();
@@ -46,6 +50,11 @@ namespace StreamApp
             /////////
             visualizerController.ParseData(soundInputHandler.GetWorkingData());
 
+            VisualizerDisplay ledDisplay = visualizerController.ledDisplay;
+            byte[] packet = ledDisplay.displayToPacket();
+            Console.WriteLine(networkHandler.TransmitData(packet));
+            //Console.WriteLine(networkHandler.PacketAsString(packet));
+
             VisualizerDisplay display = visualizerController.getDisplay();
             Bitmap led_projection = new Bitmap(display.width, display.height);
             DisplayPixel[,] pixels = display.getDisplay();
@@ -63,7 +72,7 @@ namespace StreamApp
 
         private void useDBCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            visualizerController.profile.VisualizerProfile._useDB = useDBCheckbox.Checked;
+            WorkingProfile.SoundProcessorProfile._useDB = useDBCheckbox.Checked;
         }
 
         private void ceilingInputBox_TextChanged(object sender, EventArgs e)
@@ -79,10 +88,10 @@ namespace StreamApp
                     newCeiling = MINIMUM_VALUE;
                     ceilingInput.Text = newCeiling.ToString();
                 }
-                visualizerController.profile.VisualizerProfile.visualizerCeiling = newCeiling;
+                WorkingProfile.VisualizerProfile.visualizerCeiling = newCeiling;
             }
             else
-                ceilingInput.Text = visualizerController.profile.VisualizerProfile.visualizerCeiling.ToString();
+                ceilingInput.Text = WorkingProfile.VisualizerProfile.visualizerCeiling.ToString();
         }
 
         private void peakInputBox_TextChanged(object sender, EventArgs e)
@@ -96,15 +105,15 @@ namespace StreamApp
                     newThreshold = 0;
                     listeningThresholdInput.Text = newThreshold.ToString();
                 }
-                visualizerController.profile.VisualizerProfile.activationThreshold = newThreshold;
+                WorkingProfile.VisualizerProfile.activationThreshold = newThreshold;
             }
             else
-                peakInput.Text = visualizerController.profile.VisualizerProfile.activationThreshold.ToString();
+                WorkingProfile.VisualizerProfile.activationThreshold.ToString();
         }
 
         private void grayscaleCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            visualizerController.profile.VisualizerProfile._grayscale = grayscaleCheckBox.Checked;
+            WorkingProfile.VisualizerProfile._grayscale = grayscaleCheckBox.Checked;
         }
 
         private void listeningThresholdInput_TextChanged(object sender, EventArgs e)
@@ -118,10 +127,10 @@ namespace StreamApp
                     newThreshold = 0;
                     listeningThresholdInput.Text = newThreshold.ToString();
                 }
-                visualizerController.profile.VisualizerProfile.listeningThreshold = newThreshold;
+                WorkingProfile.SoundProcessorProfile.listeningThreshold = newThreshold;
             }
             else
-                listeningThresholdInput.Text = visualizerController.profile.VisualizerProfile.listeningThreshold.ToString();
+                listeningThresholdInput.Text = WorkingProfile.SoundProcessorProfile.listeningThreshold.ToString();
         }
 
         private void beatSensitivityInput_TextChanged(object sender, EventArgs e)
@@ -136,10 +145,23 @@ namespace StreamApp
                     newSensitivity = 1;
                     beatSensitivityInput.Text = newSensitivity.ToString();
                 }
-                visualizerController.profile.VisualizerProfile.beatSensitivity = newSensitivity;
+                WorkingProfile.SoundProcessorProfile.beatSensitivity = newSensitivity;
             }
             else
-                beatSensitivityInput.Text = visualizerController.profile.VisualizerProfile.beatSensitivity.ToString();
+                WorkingProfile.SoundProcessorProfile.beatSensitivity.ToString();
+        }
+
+        private void detectBeatCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            WorkingProfile.VisualizerProfile._reactToBeat = detectBeatCheckBox.Checked;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            visualizerController.LightUpStrip(new RGBS(255, 0, 0));
+            byte[] data = visualizerController.ledDisplay.displayToPacket();
+            networkHandler.TransmitData(data);
+            //Console.WriteLine(networkHandler.PacketAsString(data));
         }
     }
 }

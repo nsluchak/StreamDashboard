@@ -45,6 +45,8 @@
             this.listeningThresholdLabel = new System.Windows.Forms.Label();
             this.beatSensitivityInput = new System.Windows.Forms.TextBox();
             this.beatSensitivityLabel = new System.Windows.Forms.Label();
+            this.detectBeatCheckBox = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.LEDProjector)).BeginInit();
             this.SuspendLayout();
             // 
@@ -96,7 +98,7 @@
             this.ceilingInput.Name = "ceilingInput";
             this.ceilingInput.Size = new System.Drawing.Size(100, 20);
             this.ceilingInput.TabIndex = 4;
-            this.ceilingInput.Text = "5000";
+            this.ceilingInput.Text = "2800";
             this.ceilingInput.TextChanged += new System.EventHandler(this.ceilingInputBox_TextChanged);
             // 
             // peakInput
@@ -105,7 +107,7 @@
             this.peakInput.Name = "peakInput";
             this.peakInput.Size = new System.Drawing.Size(100, 20);
             this.peakInput.TabIndex = 5;
-            this.peakInput.Text = "5000";
+            this.peakInput.Text = "2000";
             this.peakInput.TextChanged += new System.EventHandler(this.peakInputBox_TextChanged);
             // 
             // ceilingLabel
@@ -178,11 +180,34 @@
             this.beatSensitivityLabel.TabIndex = 12;
             this.beatSensitivityLabel.Text = "Beat Sensitivity";
             // 
+            // detectBeatCheckBox
+            // 
+            this.detectBeatCheckBox.AutoSize = true;
+            this.detectBeatCheckBox.Location = new System.Drawing.Point(376, 156);
+            this.detectBeatCheckBox.Name = "detectBeatCheckBox";
+            this.detectBeatCheckBox.Size = new System.Drawing.Size(83, 17);
+            this.detectBeatCheckBox.TabIndex = 13;
+            this.detectBeatCheckBox.Text = "Detect Beat";
+            this.detectBeatCheckBox.UseVisualStyleBackColor = true;
+            this.detectBeatCheckBox.CheckedChanged += new System.EventHandler(this.detectBeatCheckBox_CheckedChanged);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(697, 203);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 14;
+            this.button1.Text = "Listen";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Dashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 261);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.detectBeatCheckBox);
             this.Controls.Add(this.beatSensitivityLabel);
             this.Controls.Add(this.beatSensitivityInput);
             this.Controls.Add(this.listeningThresholdLabel);
@@ -223,6 +248,8 @@
         private System.Windows.Forms.Label listeningThresholdLabel;
         private System.Windows.Forms.TextBox beatSensitivityInput;
         private System.Windows.Forms.Label beatSensitivityLabel;
+        private System.Windows.Forms.CheckBox detectBeatCheckBox;
+        private System.Windows.Forms.Button button1;
     }
 }
 
